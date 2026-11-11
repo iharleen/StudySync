@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudySync – Smart Student Academic Management System</title>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+
+<body>
+
+  <!-- =========================================================================
+       PART 2: FIRST-TIME STUDENT ONBOARDING (STANDALONE SCREEN)
+       Shown ONLY when no student profile exists. Dashboard remains hidden.
+       ========================================================================= -->
+  <div class="onboarding-screen" id="onboardingScreen" style="display: none;">
+    <div class="onboarding-container">
+
+      <!-- Hero / Value Proposition Column -->
+      <div class="onboarding-hero">
+        <div class="onboarding-brand-badge">
+          <div class="brand-icon">⚡</div>
+          <div>
+            <div class="hero-brand-title">StudySync</div>
+            <div class="hero-brand-subtitle">AttendIQ Academic Suite</div>
+          </div>
+        </div>
+
+        <div class="onboarding-hero-content">
+          <h1>Smart Academic Management &amp; Attendance Tracking</h1>
+          <p class="onboarding-hero-desc">
+            Take total control over university attendance, recover shortage thresholds with mathematical accuracy, and
+            organize your coursework tasks in one private, browser-based dashboard.
+          </p>
+
+          <div class="onboarding-features-list">
+            <div class="feature-item">
+              <div class="feature-icon">🎯</div>
+              <div>
+                <strong>AttendIQ 75% Tracker</strong>
+                <p>Calculates consecutive classes needed to recover or safe classes you can miss.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">📊</div>
+              <div>
+                <strong>Visual Analytics &amp; Trends</strong>
+                <p>Interactive doughnut breakdown and subject comparison bar charts.</p>
+              </div>
+            </div>
+
+            <div class="feature-item">
+              <div class="feature-icon">📝</div>
+              <div>
+                <strong>StudySync Task Planner</strong>
+                <p>Keep track of assignments, lab deadlines, and milestone exams.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="onboarding-hero-footer">
+          <span>🔒 100% Client-Side LocalStorage • No Account or Password Needed</span>
+        </div>
+      </div>
+
+      <!-- Profile Creation Form Column -->
+      <div class="onboarding-form-card">
+        <div class="form-card-header">
+          <span class="setup-pill">Student Onboarding</span>
+          <h2>Create Your Student Profile</h2>
+          <p>Enter your academic details to personalize your attendance calculations and dashboard.</p>
+        </div>
+
+        <form id="onboardingForm" novalidate>
+          <div class="form-group">
+            <label for="onboardingFullName">Full Name *</label>
+            <input type="text" id="onboardingFullName" placeholder="e.g. Alex Rivera" required autocomplete="name">
+            <div class="field-error-msg" id="errorOnboardingFullName"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="onboardingCollege">College / University Name *</label>
+            <input type="text" id="onboardingCollege" placeholder="e.g. Stanford University / Tech Institute" required>
+            <div class="field-error-msg" id="errorOnboardingCollege"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="onboardingCourse">Course / Branch *</label>
+            <input type="text" id="onboardingCourse" placeholder="e.g. B.Tech Computer Science &amp; Engineering"
+              required>
+            <div class="field-error-msg" id="errorOnboardingCourse"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="onboardingSemester">Current Semester *</label>
+              <select id="onboardingSemester" required>
+                <option value="" disabled selected>Select semester...</option>
+                <option value="Semester 1">Semester 1</option>
+                <option value="Semester 2">Semester 2</option>
+                <option value="Semester 3">Semester 3</option>
+                <option value="Semester 4">Semester 4</option>
+                <option value="Semester 5">Semester 5</option>
+                <option value="Semester 6">Semester 6</option>
+                <option value="Semester 7">Semester 7</option>
+                <option value="Semester 8">Semester 8</option>
+              </select>
+              <div class="field-error-msg" id="errorOnboardingSemester"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="onboardingSection">Section <span class="label-optional">(Optional)</span></label>
+              <input type="text" id="onboardingSection" placeholder="e.g. Section A / Batch 2">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="onboardingSubmitBtn">
+            <span>Continue to Dashboard →</span>
+          </button>
+
+          <div class="onboarding-demo-option">
+            <span>Want to test first?</span>
+            <button type="button" class="btn-text-link" id="onboardingDemoBtn">⚡ Load Demo CS Engineering
+              Dataset</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       DASHBOARD MAIN APPLICATION CONTAINER
+       Rendered only when a valid student profile exists in LocalStorage.
+       ========================================================================= -->
+  <div class="app-container" id="appContainer" style="display: none;">
+
+    <!-- Left Navigation Sidebar -->
+    <aside class="sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-title">StudySync</div>
+          <div class="brand-subtitle">AttendIQ Academic Suite</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main Navigation</div>
+        <a href="#dashboard" class="nav-item active" data-target="dashboard" id="navDashboardBtn">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard Overview</span>
+        </a>
+        <a href="#attendanceSection" class="nav-item" data-target="attendiq" id="navAttendIQBtn">
+          <span class="nav-icon">🎯</span>
+          <span>AttendIQ Tracker</span>
+        </a>
+        <a href="#studySyncSection" class="nav-item" data-target="studysync" id="navStudySyncBtn">
+          <span class="nav-icon">📝</span>
+          <span>StudySync Tasks</span>
+        </a>
+
+        <div class="nav-section-label" style="margin-top: 18px;">Quick Shortcuts</div>
+        <a href="javascript:void(0)" class="nav-item" id="sidebarAddSubjectBtn">
+          <span class="nav-icon">➕</span>
+          <span>Add New Subject</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item" id="openProfileSettingsBtn">
+          <span class="nav-icon">⚙️</span>
+          <span>Profile &amp; Settings</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item" id="resetDataBtn">
+          <span class="nav-icon">🔄</span>
+          <span>Reset Application Data</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar User Profile Footer -->
+      <div class="sidebar-footer">
+        <div class="quick-meta" id="sidebarUserProfile" title="Click to view or edit your profile" tabindex="0"
+          role="button">
+          <div class="user-avatar" id="sidebarUserAvatar">--</div>
+          <div class="user-info">
+            <h4 id="sidebarUserName">Student Profile</h4>
+            <p id="sidebarUserCourse">Course • Semester</p>
+          </div>
+          <button class="profile-edit-btn" id="sidebarEditProfileBtn" title="Edit Profile"
+            aria-label="Edit Profile">✏️</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+
+      <!-- Top Navigation Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuToggle" aria-label="Toggle navigation">
+            ☰
+          </button>
+          <div class="header-title-group">
+            <h1 id="userGreetingTitle">Good morning, <span id="userGreetingName">Student</span> 👋</h1>
+            <div class="header-submeta">
+              <span class="header-academic-badge" id="userAcademicMeta">Course • Semester</span>
+              <span class="header-meta-dot">•</span>
+              <span class="header-date" id="currentDateDisplay">Today</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="btn btn-outline btn-sm" id="headerEditProfileBtn" title="Edit Profile &amp; Academic Settings">
+            ⚙️ <span>Profile</span>
+          </button>
+          <button class="btn btn-outline btn-sm" id="headerAddSubjectBtn" title="Add Subject">
+            ➕ <span>Add Subject</span>
+          </button>
+          <button class="btn btn-primary btn-sm" id="headerMarkAttendanceBtn" title="Mark Attendance">
+            🎯 <span>Mark Attendance</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Dashboard Body -->
+      <main class="content-body" id="dashboard">
+
+        <!-- KPI Stat Cards Row -->
+        <section class="stat-cards-grid" aria-label="Attendance Summary Metrics">
+          <div class="stat-card" id="cardOverallPct">
+            <div class="stat-top">
+              <span class="stat-label">Overall Attendance</span>
+              <div class="stat-icon primary">🎯</div>
+            </div>
+            <div class="stat-value" id="kpiOverallPercentage">--%</div>
+            <div class="stat-subtext" id="kpiOverallStatus">
+              <span>● Minimum target: 75%</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-label">Attended Classes</span>
+              <div class="stat-icon success">✅</div>
+            </div>
+            <div class="stat-value" id="kpiAttendedClasses" style="color: var(--success);">0</div>
+            <div class="stat-subtext">Present and verified</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-label">Missed Classes</span>
+              <div class="stat-icon danger">❌</div>
+            </div>
+            <div class="stat-value" id="kpiMissedClasses" style="color: var(--danger);">0</div>
+            <div class="stat-subtext">Logged absences</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-top">
+              <span class="stat-label">Total Classes</span>
+              <div class="stat-icon secondary">📚</div>
+            </div>
+            <div class="stat-value" id="kpiTotalClasses">0</div>
+            <div class="stat-subtext">Cumulative sessions</div>
+          </div>
+        </section>
+
+        <!-- Charts Analytics Row -->
+        <section class="analytics-grid" aria-label="Visual Analytics Charts">
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">Attendance Breakdown</h3>
+                <p class="chart-subtitle">Attended vs. missed distribution across all courses</p>
+              </div>
+              <span class="chart-legend-badge">Overall</span>
+            </div>
+            <div class="chart-container-doughnut">
+              <canvas id="overallDoughnutChart"></canvas>
+              <div class="doughnut-center-text">
+                <div class="doughnut-center-pct" id="doughnutCenterPct">--%</div>
+                <div class="doughnut-center-label">Avg Attendance</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <h3 class="chart-title">Subject-wise Comparison</h3>
+                <p class="chart-subtitle">Individual attendance performance against 75% threshold</p>
+              </div>
+              <span class="chart-legend-badge">Target: 75%</span>
+            </div>
+            <div class="chart-container-bar">
+              <canvas id="subjectBarChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- AttendIQ Subject Tracker Section -->
+        <section id="attendanceSection" class="dashboard-section">
+          <div class="section-header-bar">
+            <div class="section-title-group">
+              <h2>AttendIQ – Subject Attendance Cards</h2>
+              <p>Track class attendance, calculate minimum 75% recovery targets, and mark daily records.</p>
+            </div>
+
+            <div class="filter-actions-group">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="subjectSearchInput" placeholder="Search subject or code...">
+              </div>
+
+              <select class="filter-select" id="attendanceFilterSelect">
+                <option value="all">All Subjects</option>
+                <option value="critical">Shortage (&lt; 75%)</option>
+                <option value="safe">Safe (&ge; 75%)</option>
+              </select>
+
+              <button class="btn btn-primary btn-sm" id="openAddSubjectBtn">
+                <span>+ Add Subject</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Subject Cards Grid (Injected via JS or Clean Empty State) -->
+          <div class="subjects-grid" id="subjectsGrid">
+            <!-- Rendered by app.js -->
+          </div>
+        </section>
+
+        <!-- StudySync Academic Productivity Module -->
+        <section class="study-planner-section dashboard-section" id="studySyncSection">
+          <div class="section-header-bar">
+            <div class="section-title-group">
+              <h2>StudySync – Academic Tasks &amp; Study Planner</h2>
+              <p>Organize subject assignments, lab submissions, and study milestones alongside your attendance.</p>
+            </div>
+
+            <div class="task-stats-pill" id="taskStatsPill">0 Tasks Pending</div>
+          </div>
+
+          <!-- Task Creation Toolbar -->
+          <div class="task-creation-toolbar">
+            <input type="text" id="newTaskTitleInput" placeholder="Add study goal, assignment, or deadline..."
+              class="task-input-title">
+            <select id="newTaskSubjectSelect" class="task-select-subject">
+              <option value="General">General Coursework</option>
+            </select>
+            <input type="text" id="newTaskDueInput" placeholder="Due (e.g. Tomorrow, Friday)" class="task-input-due">
+            <button class="btn btn-primary btn-sm" id="quickAddTaskBtn">+ Add Task</button>
+          </div>
+
+          <!-- Task Filters Toolbar -->
+          <div class="task-filter-bar">
+            <div class="task-filter-pills">
+              <button type="button" class="task-filter-btn active" data-task-filter="all">All Tasks</button>
+              <button type="button" class="task-filter-btn" data-task-filter="pending">Pending</button>
+              <button type="button" class="task-filter-btn" data-task-filter="completed">Completed</button>
+            </div>
+          </div>
+
+          <!-- Task List Container -->
+          <div class="task-list" id="studyTaskList">
+            <!-- Rendered by app.js -->
+          </div>
+        </section>
+      </main>
+
+    </div>
+  </div>
+
+
+  <!-- =========================================================================
+       MODALS & DIALOGS
+       ========================================================================= -->
+
+  <!-- FEATURE 3: Add / Edit Subject Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle">Add New Subject</h3>
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="subjectForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="formSubjectId">
+
+          <div class="form-group">
+            <label for="formSubjectName">Subject Name *</label>
+            <input type="text" id="formSubjectName" placeholder="e.g. Computer Networks" required>
+            <div class="field-error-msg" id="errorSubjectName"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formSubjectCode">Course Code <span class="label-optional">(Optional)</span></label>
+              <input type="text" id="formSubjectCode" placeholder="e.g. CS303">
+            </div>
+            <div class="form-group">
+              <label for="formFaculty">Faculty / Instructor <span class="label-optional">(Optional)</span></label>
+              <input type="text" id="formFaculty" placeholder="e.g. Dr. Jane Doe">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formTotal">Total Classes Conducted *</label>
+              <input type="number" id="formTotal" min="0" value="0" placeholder="e.g. 40" required>
+              <div class="field-error-msg" id="errorSubjectTotal"></div>
+            </div>
+            <div class="form-group">
+              <label for="formAttended">Classes Attended *</label>
+              <input type="number" id="formAttended" min="0" value="0" placeholder="e.g. 32" required>
+              <div class="field-error-msg" id="errorSubjectAttended"></div>
+            </div>
+          </div>
+
+          <!-- Live Attendance Calculation Preview -->
+          <div class="subject-calc-preview" id="subjectFormCalcPreview">
+            <div class="calc-preview-top">
+              <div>
+                <span class="calc-preview-label">Live Calculation Preview</span>
+                <div class="calc-preview-sub">Attended: <strong id="modalPreviewAttended">0</strong> / Total: <strong
+                    id="modalPreviewTotal">0</strong></div>
+              </div>
+              <div class="percentage-badge safe" id="modalPreviewPctBadge">0.0%</div>
+            </div>
+
+            <div class="calc-preview-stats">
+              <div class="calc-stat-cell">
+                <span class="calc-mini-label">Missed Classes</span>
+                <span class="calc-mini-val" id="modalPreviewMissed" style="color: var(--danger);">0</span>
+              </div>
+              <div class="calc-stat-cell">
+                <span class="calc-mini-label">Attendance Target</span>
+                <span class="calc-mini-val" id="modalPreviewStatusText" style="color: var(--success);">Safe (≥
+                  75%)</span>
+              </div>
+            </div>
+
+            <div class="calc-preview-insight" id="modalPreviewInsight">
+              ℹ️ Minimum target is <strong>75%</strong> attendance. Enter your classes to see recovery or safe bunk
+              estimates.
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveSubjectBtn">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Subject Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteModalBackdrop">
+    <div class="modal-dialog" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3>Delete Subject</h3>
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: var(--text-muted);">
+          Are you sure you want to delete <strong id="deleteSubjectName" style="color: var(--text-main);">this
+            subject</strong>? All logged attendance data for this subject will be permanently removed.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline modal-close-trigger">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE 5: Profile Settings & Academic Info Modal -->
+  <div class="modal-backdrop" id="profileModalBackdrop">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.25rem;">👤</span>
+          <h3>Student Profile &amp; Settings</h3>
+        </div>
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="profileEditForm" novalidate>
+        <div class="modal-body">
+          <div class="profile-card-preview">
+            <div class="user-avatar-lg" id="profileModalAvatar">--</div>
+            <div class="profile-preview-details">
+              <h4 id="profileModalPreviewName">Student Name</h4>
+              <p id="profileModalPreviewSub">Course • Semester</p>
+              <span class="profile-college-tag" id="profileModalPreviewCollege">College</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="profileEditFullName">Full Name *</label>
+            <input type="text" id="profileEditFullName" required>
+            <div class="field-error-msg" id="errorProfileEditFullName"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="profileEditCollege">College / University Name *</label>
+            <input type="text" id="profileEditCollege" required>
+            <div class="field-error-msg" id="errorProfileEditCollege"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="profileEditCourse">Course / Branch *</label>
+            <input type="text" id="profileEditCourse" required>
+            <div class="field-error-msg" id="errorProfileEditCourse"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="profileEditSemester">Current Semester *</label>
+              <select id="profileEditSemester" required>
+                <option value="Semester 1">Semester 1</option>
+                <option value="Semester 2">Semester 2</option>
+                <option value="Semester 3">Semester 3</option>
+                <option value="Semester 4">Semester 4</option>
+                <option value="Semester 5">Semester 5</option>
+                <option value="Semester 6">Semester 6</option>
+                <option value="Semester 7">Semester 7</option>
+                <option value="Semester 8">Semester 8</option>
+              </select>
+              <div class="field-error-msg" id="errorProfileEditSemester"></div>
+            </div>
+            <div class="form-group">
+              <label for="profileEditSection">Section <span class="label-optional">(Optional)</span></label>
+              <input type="text" id="profileEditSection" placeholder="e.g. Section A">
+            </div>
+          </div>
+
+          <!-- Danger Zone: Reset Application Data -->
+          <div class="settings-danger-card">
+            <div class="danger-header">
+              <span>⚠️ Application Data Reset</span>
+            </div>
+            <p>Clear student profile, personal subjects, and attendance records to start onboarding fresh, or reload
+              sample dataset.</p>
+            <button type="button" class="btn btn-outline-danger btn-sm" id="openResetFromProfileBtn">
+              Reset Application Data...
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveProfileBtn">Save Profile Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FEATURE 5: Reset Application Data Confirmation Dialog -->
+  <div class="modal-backdrop" id="resetModalBackdrop">
+    <div class="modal-dialog" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 style="color: var(--danger-dark);">⚠️ Reset Application Data</h3>
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 12px;">
+          Please confirm how you want to reset your StudySync workspace data:
+        </p>
+
+        <div class="reset-choices">
+          <div class="reset-choice-card">
+            <div class="reset-choice-title">Option A: Reset &amp; Start Fresh (Recommended)</div>
+            <p class="reset-choice-desc">Wipes student profile, attendance logs, and study tasks. Returns you
+              immediately to the first-time onboarding screen.</p>
+          </div>
+          <div class="reset-choice-card">
+            <div class="reset-choice-title">Option B: Load Sample Engineering Data</div>
+            <p class="reset-choice-desc">Loads 5 demo computer science subjects (CS301-CS305) with sample attendance and
+              tasks for testing.</p>
+          </div>
+        </div>
+
+        <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 10px;">
+          🔒 All changes take effect immediately in this browser's LocalStorage.
+        </p>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="btn btn-outline modal-close-trigger">Cancel</button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="btn btn-outline btn-sm" id="confirmResetSampleBtn">Load Sample Data</button>
+          <button type="button" class="btn btn-danger btn-sm" id="confirmResetFreshBtn">Reset &amp; Start Fresh</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PART 3: Edit Study Task Modal -->
+  <div class="modal-backdrop" id="taskEditModalBackdrop">
+    <div class="modal-dialog" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Edit Study Task</h3>
+        <button class="modal-close-btn modal-close-trigger" aria-label="Close modal">&times;</button>
+      </div>
+      <form id="taskEditForm" novalidate>
+        <div class="modal-body">
+          <input type="hidden" id="editTaskId">
+
+          <div class="form-group">
+            <label for="editTaskTitle">Task Title *</label>
+            <input type="text" id="editTaskTitle" placeholder="e.g. Complete DSA assignment" required>
+            <div class="field-error-msg" id="errorEditTaskTitle"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="editTaskSubject">Associated Subject</label>
+            <select id="editTaskSubject" class="form-select">
+              <option value="General">General Coursework</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="editTaskDue">Due Date / Timeline</label>
+            <input type="text" id="editTaskDue" placeholder="e.g. Tomorrow, Friday, Next Week">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline modal-close-trigger">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveTaskEditBtn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Non-intrusive Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/attendance.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
